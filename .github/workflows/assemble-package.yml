@@ -1,0 +1,36 @@
+name: Assemble Prodeo package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "upload/3.0.1/**"
+      - ".github/workflows/assemble-package.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble and verify package
+        shell: bash
+        run: |
+          set -euo pipefail
+          parts=(upload/3.0.1/part-*.txt)
+          test "${#parts[@]}" -eq 5
+          mkdir -p releases/3.0.1
+          cat "${parts[@]}" | base64 --decode > releases/3.0.1/Prodeo-Update-3.0.1.zip
+          echo "2ccbe15a36b24763e7b5e3efced24d2d5d1376f71ccfff99489c43f353b3d91e  releases/3.0.1/Prodeo-Update-3.0.1.zip" | sha256sum -c -
+          test "$(stat -c%s releases/3.0.1/Prodeo-Update-3.0.1.zip)" = "74664"
+      - name: Commit assembled package
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add releases/3.0.1/Prodeo-Update-3.0.1.zip
+          git diff --cached --quiet || git commit -m "Assemble Prodeo 3.0.1 update package"
+          git push
