@@ -1,0 +1,78 @@
+name: Validate Prodeo update channel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "channel/**"
+      - "releases/**"
+      - "schemas/**"
+      - ".github/workflows/validate-release.yml"
+  pull_request:
+    paths:
+      - "channel/**"
+      - "releases/**"
+      - "schemas/**"
+      - ".github/workflows/validate-release.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate manifest, checksum, and ZIP
+        shell: python
+        run: |
+          import hashlib
+          import json
+          import pathlib
+          import re
+          import zipfile
+
+          root = pathlib.Path('.')
+          manifest_path = root / 'channel' / 'stable.json'
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8-sig'))
+
+          required = {
+              'schema', 'name', 'channel', 'version', 'minimum_version',
+              'package_format', 'published_at', 'download_url', 'sha256',
+              'size', 'notes'
+          }
+          missing = sorted(required - manifest.keys())
+          if missing:
+              raise SystemExit(f'Missing manifest fields: {missing}')
+          if manifest['schema'] != 1 or manifest['channel'] != 'stable':
+              raise SystemExit('Unsupported channel manifest')
+          if not re.fullmatch(r'\d+\.\d+\.\d+', str(manifest['version'])):
+              raise SystemExit('Invalid version')
+          if not re.fullmatch(r'[a-f0-9]{64}', str(manifest['sha256'])):
+              raise SystemExit('Invalid SHA-256')
+
+          version = manifest['version']
+          package = root / 'releases' / version / f'Prodeo-Update-{version}.zip'
+          checksum_file = package.with_suffix(package.suffix + '.sha256')
+          if not package.is_file():
+              raise SystemExit(f'Package missing: {package}')
+          if package.stat().st_size != int(manifest['size']):
+              raise SystemExit('Package size does not match manifest')
+
+          digest = hashlib.sha256(package.read_bytes()).hexdigest()
+          if digest != manifest['sha256']:
+              raise SystemExit('Package checksum does not match manifest')
+          if not checksum_file.is_file() or digest not in checksum_file.read_text(encoding='ascii'):
+              raise SystemExit('Checksum sidecar is missing or invalid')
+
+          with zipfile.ZipFile(package) as archive:
+              names = set(archive.namelist())
+              if 'update-manifest.json' not in names:
+                  raise SystemExit('ZIP does not contain update-manifest.json')
+              if not any(name.startswith('payload/') for name in names):
+                  raise SystemExit('ZIP does not contain payload/')
+              inside = json.loads(archive.read('update-manifest.json').decode('utf-8-sig'))
+              if inside.get('version') != version:
+                  raise SystemExit('Version inside ZIP does not match stable manifest')
+
+          print(f'Validated Prodeo {version}: {package.stat().st_size} bytes, {digest}')
