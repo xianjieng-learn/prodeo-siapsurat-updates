@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Prodeo SIAPSurat Desktop",
+  "channel": "stable",
+  "version": "3.0.1",
+  "minimum_version": "3.0.0",
+  "package_format": 2,
+  "published_at": "2026-07-31T17:30:00+07:00",
+  "download_url": "https://raw.githubusercontent.com/xianjieng-learn/prodeo-siapsurat-updates/main/releases/3.0.1/Prodeo-Update-3.0.1.zip",
+  "sha256": "dba0e45fa50755c15bd05682c5b56f6349376efa373ce03bb3b4d96fc67058da",
+  "size": 4467161,
+  "notes": [
+    "Menjadikan GitHub sebagai kanal pembaruan online default",
+    "Memvalidasi ukuran, format, versi, dan checksum manifest/paket",
+    "Memigrasikan instalasi lama yang belum memiliki URL pembaruan",
+    "Tetap mendukung pemasangan paket update ZIP secara offline"
+  ],
+  "repository_url": "https://github.com/xianjieng-learn/prodeo-siapsurat-updates"
+}
