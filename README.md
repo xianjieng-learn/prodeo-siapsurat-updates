@@ -13,7 +13,7 @@ Manifest menyediakan nomor versi terbaru, URL paket ZIP, checksum SHA-256, ukura
 ## Struktur
 
 - `channel/stable.json` — manifest yang dibaca aplikasi.
-- `releases/<versi>/` — paket pembaruan dan checksum.
+- `releases/<versi>/` — paket pembaruan, checksum, dan catatan perubahan.
 - `schemas/update-manifest.schema.json` — spesifikasi manifest.
 - `.github/workflows/validate-release.yml` — validasi otomatis manifest, checksum, dan isi ZIP.
 
@@ -23,4 +23,4 @@ Aplikasi hanya memasang paket setelah checksum SHA-256 cocok. Repository ini tid
 
 ## Rilis terbaru
 
-**3.0.1** — GitHub menjadi kanal pembaruan online default pada installer Prodeo berikutnya.
+**3.0.2** — Menambahkan sinkronisasi SIAPSurat otomatis selama aplikasi terbuka, interval adaptif, backoff saat gagal, indikator status, dan notifikasi perubahan tanpa duplikasi.
