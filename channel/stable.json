@@ -2,18 +2,20 @@
   "schema": 1,
   "name": "Prodeo SIAPSurat Desktop",
   "channel": "stable",
-  "version": "3.0.1",
-  "minimum_version": "3.0.0",
+  "version": "3.0.2",
+  "minimum_version": "3.0.1",
   "package_format": 2,
-  "published_at": "2026-07-31T17:54:00+07:00",
-  "download_url": "https://raw.githubusercontent.com/xianjieng-learn/prodeo-siapsurat-updates/main/releases/3.0.1/Prodeo-Update-3.0.1.zip",
-  "sha256": "2ccbe15a36b24763e7b5e3efced24d2d5d1376f71ccfff99489c43f353b3d91e",
-  "size": 74664,
+  "published_at": "2026-08-03T16:28:00+07:00",
+  "download_url": "https://raw.githubusercontent.com/xianjieng-learn/prodeo-siapsurat-updates/main/releases/3.0.2/Prodeo-Update-3.0.2.zip",
+  "sha256": "6c7ea5e7d585914dfac8eb7222b06cedf814713c002120e739bb3bc130964c14",
+  "size": 136509,
   "notes": [
-    "Menjadikan GitHub sebagai kanal pembaruan online default",
-    "Memvalidasi ukuran, format, versi, dan checksum manifest/paket",
-    "Memigrasikan instalasi lama yang belum memiliki URL pembaruan",
-    "Tetap mendukung pemasangan paket update ZIP secara offline"
+    "Menambahkan sinkronisasi SIAPSurat otomatis selama aplikasi terbuka",
+    "Interval adaptif 5 menit normal dan 2 menit saat menunggu TTE",
+    "Backoff otomatis 10, 20, dan maksimal 30 menit saat gagal",
+    "Mencegah pemeriksaan ganda saat upload atau pekerjaan lain berjalan",
+    "Menambahkan indikator, Periksa Sekarang, dan pengaturan sinkronisasi",
+    "Mengirim notifikasi perubahan status dan TTE tanpa duplikasi"
   ],
   "repository_url": "https://github.com/xianjieng-learn/prodeo-siapsurat-updates"
 }
