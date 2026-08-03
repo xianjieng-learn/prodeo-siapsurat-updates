@@ -1,0 +1,45 @@
+name: Assemble Prodeo 3.0.2 package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "upload/3.0.2/chunk-*.txt"
+      - ".github/workflows/assemble-package-v302.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble and verify package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t parts < <(find upload/3.0.2 -maxdepth 1 -type f -name 'chunk-*.txt' | sort)
+          test "${#parts[@]}" -eq 16
+          mkdir -p releases/3.0.2
+          cat "${parts[@]}" | tr -d '[:space:]' | base64 --decode > releases/3.0.2/Prodeo-Update-3.0.2.zip
+          echo "6c7ea5e7d585914dfac8eb7222b06cedf814713c002120e739bb3bc130964c14  releases/3.0.2/Prodeo-Update-3.0.2.zip" | sha256sum -c -
+          test "$(stat -c%s releases/3.0.2/Prodeo-Update-3.0.2.zip)" = "136509"
+          python - <<'PY'
+          import json, zipfile
+          p='releases/3.0.2/Prodeo-Update-3.0.2.zip'
+          with zipfile.ZipFile(p) as z:
+              manifest=json.loads(z.read('update-manifest.json').decode('utf-8-sig'))
+              assert manifest['version']=='3.0.2'
+              assert any(n.startswith('payload/') for n in z.namelist())
+          PY
+      - name: Commit assembled package
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add releases/3.0.2/Prodeo-Update-3.0.2.zip
+          git diff --cached --quiet || git commit -m "Assemble Prodeo 3.0.2 update package"
+          git push
