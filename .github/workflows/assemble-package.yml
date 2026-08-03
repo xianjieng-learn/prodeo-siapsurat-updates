@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "upload/3.0.1/**"
+      - "upload/3.0.2/chunk-*.txt"
       - ".github/workflows/assemble-package.yml"
 
 permissions:
@@ -19,18 +19,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          parts=(upload/3.0.1/part-*.txt)
-          test "${#parts[@]}" -eq 5
-          mkdir -p releases/3.0.1
-          cat "${parts[@]}" | base64 --decode > releases/3.0.1/Prodeo-Update-3.0.1.zip
-          echo "2ccbe15a36b24763e7b5e3efced24d2d5d1376f71ccfff99489c43f353b3d91e  releases/3.0.1/Prodeo-Update-3.0.1.zip" | sha256sum -c -
-          test "$(stat -c%s releases/3.0.1/Prodeo-Update-3.0.1.zip)" = "74664"
+          mapfile -t parts < <(find upload/3.0.2 -maxdepth 1 -type f -name 'chunk-*.txt' | sort)
+          test "${#parts[@]}" -eq 16
+          mkdir -p releases/3.0.2
+          cat "${parts[@]}" | base64 --decode > releases/3.0.2/Prodeo-Update-3.0.2.zip
+          echo "6c7ea5e7d585914dfac8eb7222b06cedf814713c002120e739bb3bc130964c14  releases/3.0.2/Prodeo-Update-3.0.2.zip" | sha256sum -c -
+          test "$(stat -c%s releases/3.0.2/Prodeo-Update-3.0.2.zip)" = "136509"
       - name: Commit assembled package
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add releases/3.0.1/Prodeo-Update-3.0.1.zip
-          git diff --cached --quiet || git commit -m "Assemble Prodeo 3.0.1 update package"
+          git add releases/3.0.2/Prodeo-Update-3.0.2.zip
+          git diff --cached --quiet || git commit -m "Assemble Prodeo 3.0.2 update package"
           git push
